@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION "public"."user_signup"("userid_input" varchar, "password_input" varchar, "salt_input" varchar)
+  RETURNS "pg_catalog"."void" AS $BODY$
+begin
+insert into users(userid, password, salt, admin) VALUES (userid_input, password_input, salt_input, FALSE);
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+
+
+CREATE OR REPLACE FUNCTION "public"."person_wordsv2"("name_input" varchar)
+  RETURNS TABLE("word" text, "weight" int8) AS $BODY$
+begin
+return query
+select wi.word, count(wi.word) as weight 
+from person NATURAL join movie_partof NATURAL join wi 
+where person.primaryname = name_input
+GROUP BY wi.word order by weight desc LIMIT 10;
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+  ROWS 1000
